@@ -81,11 +81,11 @@ const handleSubmit = async () => {
     formData.append('report_type', reportType);
 
     console.log("📤 Making API call...");
-    console.log("🔗 URL:", 'https://health-app-backend-v0.onrender.com/api/upload/');
+    console.log("🔗 URL:", 'https://health-app-backend-v1.onrender.com/api/upload/');
     console.log("🔑 Authorization header:", `Bearer ${token.substring(0, 50)}...`);
 
     // Make API call to backend
-    const response = await fetch('https://health-app-backend-v0.onrender.com/api/upload/', {
+    const response = await fetch('https://health-app-backend-v1.onrender.com/api/upload/', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
