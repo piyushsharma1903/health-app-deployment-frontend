@@ -41,61 +41,90 @@ const UploadForm = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!selectedFile || !reportType) {
-      alert("Please select a file and report type.");
-      return;
+ // Enhanced handleSubmit function with better debugging
+const handleSubmit = async () => {
+  if (!selectedFile || !reportType) {
+    alert("Please select a file and report type.");
+    return;
+  }
+
+  setUploading(true);
+  setUploadStatus("Uploading...");
+
+  try {
+    // Get Firebase auth token with enhanced debugging
+    const user = auth.currentUser;
+    console.log("🔥 Current user:", user);
+    console.log("🔥 User UID:", user?.uid);
+    console.log("🔥 User email:", user?.email);
+    
+    if (!user) {
+      throw new Error("Please log in first");
     }
 
-    setUploading(true);
-    setUploadStatus("Uploading...");
-
-    try {
-      // Get Firebase auth token
-      const user = auth.currentUser;
-      if (!user) {
-        throw new Error("Please log in first");
-      }
-
-      const token = await user.getIdToken();
-      
-      // Create FormData
-      const formData = new FormData();
-      formData.append('original_file', selectedFile);
-      formData.append('report_type', reportType);
-
-      // Make API call to backend
-      const response = await fetch('https://health-app-backend-20h2.onrender.com/api/upload/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Upload failed');
-      }
-
-      const result = await response.json();
-      
-      setUploadStatus("✅ Report uploaded and processed successfully!");
-      setSelectedFile(null);
-      setReportType("");
-      
-      // Optionally show AI summary
-      if (result.ai_summary) {
-        console.log("AI Summary:", result.ai_summary);
-      }
-
-    } catch (error) {
-      console.error("Upload error:", error);
-      setUploadStatus(`❌ Upload failed: ${error.message}`);
-    } finally {
-      setUploading(false);
+    console.log("🎫 Getting ID token...");
+    const token = await user.getIdToken(true); // Force refresh
+    console.log("✅ Token obtained, length:", token.length);
+    console.log("🎫 Token preview (first 50 chars):", token.substring(0, 50) + "...");
+    
+    // Verify token format (should be JWT with 3 parts)
+    const tokenParts = token.split('.');
+    console.log("🔍 Token parts count:", tokenParts.length);
+    
+    if (tokenParts.length !== 3) {
+      throw new Error("Invalid token format - not a valid JWT");
     }
-  };
+    
+    // Create FormData
+    const formData = new FormData();
+    formData.append('original_file', selectedFile);
+    formData.append('report_type', reportType);
+
+    console.log("📤 Making API call...");
+    console.log("🔗 URL:", 'https://health-app-backend-v0.onrender.com/api/upload/');
+    console.log("🔑 Authorization header:", `Bearer ${token.substring(0, 50)}...`);
+
+    // Make API call to backend
+    const response = await fetch('https://health-app-backend-v0.onrender.com/api/upload/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData
+    });
+
+    console.log("📥 Response status:", response.status);
+    console.log("📥 Response headers:", response.headers);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("❌ API Error Response:", errorData);
+      throw new Error(errorData.error || `HTTP ${response.status}: Upload failed`);
+    }
+
+    const result = await response.json();
+    console.log("✅ Success response:", result);
+    
+    setUploadStatus("✅ Report uploaded and processed successfully!");
+    setSelectedFile(null);
+    setReportType("");
+    
+    // Optionally show AI summary
+    if (result.ai_summary) {
+      console.log("AI Summary:", result.ai_summary);
+    }
+
+  } catch (error) {
+    console.error("❌ Upload error details:");
+    console.error("- Error type:", error.constructor.name);
+    console.error("- Error message:", error.message);
+    console.error("- Full error:", error);
+    
+    setUploadStatus(`❌ Upload failed: ${error.message}`);
+  } finally {
+    setUploading(false);
+  }
+};
 
   return (
     <div style={{ 

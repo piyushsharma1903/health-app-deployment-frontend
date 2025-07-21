@@ -39,9 +39,9 @@ const ReportTable = () => {
     };
     
     console.log("📡 Request headers:", headers);
-    console.log("📡 Making request to: https://health-app-backend-20h2.onrender.com/api/reports/");
+    console.log("📡 Making request to: https://health-app-backend-v0.onrender.com/api/reports/");
 
-    const response = await axios.get("https://health-app-backend-20h2.onrender.com/api/reports/", {
+    const response = await axios.get("https://health-app-backend-v0.onrender.com/api/reports/", {
       headers: headers,
     });
 
@@ -99,7 +99,7 @@ const ReportTable = () => {
     try {
       const idToken = await user.getIdToken(true);
       
-      await axios.delete(`https://health-app-backend-20h2.onrender.com/api/reports/${id}/`, {
+      await axios.delete(`https://health-app-backend-v0.onrender.com/api/reports/${id}/`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
           'Content-Type': 'application/json',
@@ -203,7 +203,7 @@ const ReportTable = () => {
                 <td>
                   <button
                     onClick={() => {
-                      setModalImage(`https://health-app-backend-20h2.onrender.com${report.original_file}`);
+                      setModalImage(`https://health-app-backend-v0.onrender.com${report.original_file}`);
                       setReportModalOpen(true);
                     }}
                     style={{
