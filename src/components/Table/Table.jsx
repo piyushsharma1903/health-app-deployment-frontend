@@ -39,9 +39,9 @@ const ReportTable = () => {
     };
     
     console.log("📡 Request headers:", headers);
-    console.log("📡 Making request to: https://web-production-0820.up.railway.app/api/reports/");
+    console.log("📡 Making request to: https://web-production-01c0c.up.railway.app/api/reports/");
 
-    const response = await axios.get("https://web-production-0820.up.railway.app/api/reports/", {
+    const response = await axios.get("https://web-production-01c0c.up.railway.app/api/reports/", {
       headers: headers,
     });
 
@@ -99,7 +99,7 @@ const ReportTable = () => {
     try {
       const idToken = await user.getIdToken(true);
       
-      await axios.delete(`https://web-production-0820.up.railway.app/api/reports/${id}/`, {
+      await axios.delete(`https://web-production-01c0c.up.railway.app/api/reports/${id}/`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
           'Content-Type': 'application/json',
@@ -203,7 +203,7 @@ const ReportTable = () => {
                 <td>
                   <button
                     onClick={() => {
-                      setModalImage(`https://web-production-0820.up.railway.app${report.original_file}`);
+                      setModalImage(`https://web-production-01c0c.up.railway.app${report.original_file}`);
                       setReportModalOpen(true);
                     }}
                     style={{

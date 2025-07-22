@@ -81,11 +81,11 @@ const handleSubmit = async () => {
     formData.append('report_type', reportType);
 
     console.log("📤 Making API call...");
-    console.log("🔗 URL:", 'https://web-production-0820.up.railway.app/api/upload/');
+    console.log("🔗 URL:", 'https://web-production-01c0c.up.railway.app/api/upload/');
     console.log("🔑 Authorization header:", `Bearer ${token.substring(0, 50)}...`);
 
     // Make API call to backend
-    const response = await fetch('https://web-production-0820.up.railway.app/api/upload/', {
+    const response = await fetch('https://web-production-01c0c.up.railway.app/api/upload/', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
