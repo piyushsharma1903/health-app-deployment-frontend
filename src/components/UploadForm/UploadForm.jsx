@@ -10,8 +10,7 @@ const UploadForm = () => {
 
   const reportTypes = [
     { value: "lab", label: "Lab" },
-    { value: "ct", label: "CT" },
-    { value: "mri", label: "MRI" }
+    
   ];
 
   const handleFileChange = (e) => {
@@ -77,15 +76,15 @@ const handleSubmit = async () => {
     
     // Create FormData
     const formData = new FormData();
-    formData.append('original_file', selectedFile);
+    formData.append('file', selectedFile);
     formData.append('report_type', reportType);
 
     console.log("📤 Making API call...");
-    console.log("🔗 URL:", 'https://health-app-render.onrender.com/api/upload/');
+    console.log("🔗 URL:", 'http://127.0.0.1:8000/api/upload/');
     console.log("🔑 Authorization header:", `Bearer ${token.substring(0, 50)}...`);
 
     // Make API call to backend
-    const response = await fetch('https://health-app-render.onrender.com/api/upload/', {
+    const response = await fetch('http://127.0.0.1:8000/api/upload/', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

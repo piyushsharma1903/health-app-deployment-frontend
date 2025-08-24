@@ -10,58 +10,70 @@ const ReportTable = () => {
   const [reports, setReports] = useState([]);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
-  const [modalImage, setModalImage] = useState(null);
+  const [selectedReport, setSelectedReport] = useState(null); // 🔧 FIXED: Store full report object
   const [selectedSummary, setSelectedSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchReports = async (user) => {
-  try {
-    setLoading(true);
-    setError(null);
-    
-    console.log("🔍 User object:", user);
-    console.log("🔍 User email:", user.email);
-    console.log("🔍 User UID:", user.uid);
-    
-    // Get a fresh token
-    const idToken = await user.getIdToken(true);
-    console.log("🎫 Token generated (first 50 chars):", idToken.substring(0, 50) + "...");
-    console.log("🎫 Token length:", idToken.length);
-    
-    // Verify token format
-    const tokenParts = idToken.split('.');
-    console.log("🎫 Token parts count:", tokenParts.length);
-    
-    const headers = {
-      Authorization: `Bearer ${idToken}`,
-      'Content-Type': 'application/json',
-    };
-    
-    console.log("📡 Request headers:", headers);
-    console.log("📡 Making request to: https://health-app-render.onrender.com/api/reports/");
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log("🔍 User object:", user);
+      console.log("🔍 User email:", user.email);
+      console.log("🔍 User UID:", user.uid);
+      
+      // Get a fresh token
+      const idToken = await user.getIdToken(true);
+      console.log("🎫 Token generated (first 50 chars):", idToken.substring(0, 50) + "...");
+      console.log("🎫 Token length:", idToken.length);
+      
+      // Verify token format
+      const tokenParts = idToken.split('.');
+      console.log("🎫 Token parts count:", tokenParts.length);
+      
+      const headers = {
+        Authorization: `Bearer ${idToken}`,
+        'Content-Type': 'application/json',
+      };
+      
+      console.log("📡 Request headers:", headers);
+      console.log("📡 Making request to: http://127.0.0.1:8000/api/reports/");
 
-    const response = await axios.get("https://health-app-render.onrender.com/api/reports/", {
-      headers: headers,
-    });
+      const response = await axios.get("http://127.0.0.1:8000/api/reports/", {
+        headers: headers,
+      });
 
-    setReports(response.data);
-    console.log("✅ Reports fetched successfully:", response.data);
-  } catch (err) {
-    console.error("❌ Full error object:", err);
-    console.error("❌ Error response:", err.response);
-    console.error("❌ Error status:", err.response?.status);
-    console.error("❌ Error data:", err.response?.data);
-    
-    if (err.response?.status === 401) {
-      setError("Authentication failed. Please log in again.");
-    } else {
-      setError("Failed to fetch reports. Please try again.");
+      setReports(response.data);
+      console.log("✅ Reports fetched successfully:", response.data);
+      
+      // 🔧 ADDED: Debug each report's file fields
+      response.data.forEach((report, index) => {
+        console.log(`📋 Report ${index + 1}:`, {
+          id: report.id,
+          file: report.file,
+          file_url: report.file_url,
+          report_type: report.report_type,
+          report_date: report.report_date
+        });
+      });
+      
+    } catch (err) {
+      console.error("❌ Full error object:", err);
+      console.error("❌ Error response:", err.response);
+      console.error("❌ Error status:", err.response?.status);
+      console.error("❌ Error data:", err.response?.data);
+      
+      if (err.response?.status === 401) {
+        setError("Authentication failed. Please log in again.");
+      } else {
+        setError("Failed to fetch reports. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     const auth = getAuth();
@@ -99,7 +111,7 @@ const ReportTable = () => {
     try {
       const idToken = await user.getIdToken(true);
       
-      await axios.delete(`https://health-app-render.onrender.com/api/reports/${id}/`, {
+      await axios.delete(`http://127.0.0.1:8000/api/reports/${id}/`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
           'Content-Type': 'application/json',
@@ -126,6 +138,16 @@ const ReportTable = () => {
       reportDate: report.report_date,
     });
     setSummaryModalOpen(true);
+  };
+
+  // 🔧 FIXED: Handle viewing report image
+  const handleViewReport = (report) => {
+    console.log("🖼️ Opening report modal for:", report);
+    console.log("📁 Report file field:", report.file);
+    console.log("🔗 Report file_url field:", report.file_url);
+    
+    setSelectedReport(report); // Store the full report object
+    setReportModalOpen(true);
   };
 
   const handleRetry = () => {
@@ -201,11 +223,9 @@ const ReportTable = () => {
                   </button>
                 </td>
                 <td>
+                  {/* 🔧 FIXED: Use correct function and check for valid file URL */}
                   <button
-                    onClick={() => {
-                      setModalImage(`https://health-app-render.onrender.com${report.original_file}`);
-                      setReportModalOpen(true);
-                    }}
+                    onClick={() => handleViewReport(report)}
                     style={{
                       backgroundColor: "transparent",
                       color: "#007bff",
@@ -215,9 +235,13 @@ const ReportTable = () => {
                       cursor: "pointer",
                     }}
                     title="View Report Image"
+                    disabled={!report.file_url && !report.file} // Disable if no file
                   >
                     <FaFileAlt />
                   </button>
+                  
+                  {/* 🔧 ADDED: Debug info for each row in development */}
+                  
                 </td>
                 <td>
                   <button
@@ -239,10 +263,15 @@ const ReportTable = () => {
         </tbody>
       </table>
 
+      {/* 🔧 FIXED: Pass both reportData and imageUrl props */}
       <ReportModal
         isOpen={reportModalOpen}
-        onClose={() => setReportModalOpen(false)}
-        imageUrl={modalImage}
+        onClose={() => {
+          setReportModalOpen(false);
+          setSelectedReport(null); // Clear selected report when closing
+        }}
+        reportData={selectedReport}  // ✅ Pass the full report object
+        imageUrl={selectedReport?.file_url || selectedReport?.file} // ✅ Use correct field names
       />
 
       <SummaryModal
